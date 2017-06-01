@@ -1,17 +1,19 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
+
 
 public static class Utilities
 {
-
     /// <summary>
-    /// The AnimatePotentialMatches coroutine takes a list of GameObjects and modifies their opacity (from 1.0 to 0.3 and then to 1.0)
-    /// using a defined time delay. This is to animate the potential matches that are given as a hint to the user.
+    /// Helper method to animate potential matches
     /// </summary>
     /// <param name="potentialMatches"></param>
     /// <returns></returns>
-	public static IEnumerator AnimatePotentialMatches(IEnumerable<GameObject> potentialMatches)
+    public static IEnumerator AnimatePotentialMatches(IEnumerable<GameObject> potentialMatches)
     {
         for (float i = 1f; i >= 0.3f; i -= 0.1f)
         {
@@ -21,10 +23,8 @@ public static class Utilities
                 c.a = i;
                 item.GetComponent<SpriteRenderer>().color = c;
             }
-
             yield return new WaitForSeconds(Constants.OpacityAnimationFrameDelay);
         }
-
         for (float i = 0.3f; i <= 1f; i += 0.1f)
         {
             foreach (var item in potentialMatches)
@@ -33,32 +33,34 @@ public static class Utilities
                 c.a = i;
                 item.GetComponent<SpriteRenderer>().color = c;
             }
-
             yield return new WaitForSeconds(Constants.OpacityAnimationFrameDelay);
         }
     }
 
-    //!  Returns true if the two shapes that are passed as parameters are next to each other, either vertically or horizontally.
+    /// <summary>
+    /// Checks if a shape is next to another one
+    /// either horizontally or vertically
+    /// </summary>
+    /// <param name="s1"></param>
+    /// <param name="s2"></param>
+    /// <returns></returns>
     public static bool AreVerticalOrHorizontalNeighbors(Shape s1, Shape s2)
     {
-        return (s1.Column == s2.Column || s1.Row == s2.Row
-                                        && Mathf.Abs(s1.Column - s2.Column) <= 1
-                                        && Mathf.Abs(s1.Row - s2.Row) <= 1);
+        return (s1.Column == s2.Column ||
+                        s1.Row == s2.Row)
+                        && Mathf.Abs(s1.Column - s2.Column) <= 1
+                        && Mathf.Abs(s1.Row - s2.Row) <= 1;
     }
 
     /// <summary>
-
     /// Will check for potential matches vertically and horizontally
-
     /// </summary>
-
     /// <returns></returns>
-
     public static IEnumerable<GameObject> GetPotentialMatches(ShapesArray shapes)
     {
         //list that will contain all the matches we find
         List<List<GameObject>> matches = new List<List<GameObject>>();
-
+       
         for (int row = 0; row < Constants.Rows; row++)
         {
             for (int column = 0; column < Constants.Columns; column++)
@@ -82,17 +84,13 @@ public static class Utilities
                 if (matches.Count >= 3)
                     return matches[UnityEngine.Random.Range(0, matches.Count - 1)];
 
-
                 //if we are in the middle of the calculations/loops
                 //and we have less than 3 matches, return a random one
-
-                if (row >= Constants.Rows / 2 && matches.Count > 0 && matches.Count <= 2)
+                if(row >= Constants.Rows / 2 && matches.Count > 0 && matches.Count <=2)
                     return matches[UnityEngine.Random.Range(0, matches.Count - 1)];
-
             }
         }
         return null;
-
     }
 
     public static List<GameObject> CheckHorizontal1(int row, int column, ShapesArray shapes)
@@ -100,11 +98,10 @@ public static class Utilities
         if (column <= Constants.Columns - 2)
         {
             if (shapes[row, column].GetComponent<Shape>().
-                 IsSameType(shapes[row, column + 1].GetComponent<Shape>()))
+                IsSameType(shapes[row, column + 1].GetComponent<Shape>()))
             {
                 if (row >= 1 && column >= 1)
                     if (shapes[row, column].GetComponent<Shape>().
-
                     IsSameType(shapes[row - 1, column - 1].GetComponent<Shape>()))
                         return new List<GameObject>()
                                 {
@@ -112,6 +109,14 @@ public static class Utilities
                                     shapes[row, column + 1],
                                     shapes[row - 1, column - 1]
                                 };
+
+                /* example *\
+                 * * * * *
+                 * * * * *
+                 * * * * *
+                 * & & * *
+                 & * * * *
+                \* example  */
 
                 if (row <= Constants.Rows - 2 && column >= 1)
                     if (shapes[row, column].GetComponent<Shape>().
@@ -122,10 +127,19 @@ public static class Utilities
                                     shapes[row, column + 1],
                                     shapes[row + 1, column - 1]
                                 };
+
+                /* example *\
+                 * * * * *
+                 * * * * *
+                 & * * * *
+                 * & & * *
+                 * * * * *
+                \* example  */
             }
         }
         return null;
     }
+
 
     public static List<GameObject> CheckHorizontal2(int row, int column, ShapesArray shapes)
     {
@@ -134,6 +148,7 @@ public static class Utilities
             if (shapes[row, column].GetComponent<Shape>().
                 IsSameType(shapes[row, column + 1].GetComponent<Shape>()))
             {
+
                 if (row >= 1 && column <= Constants.Columns - 3)
                     if (shapes[row, column].GetComponent<Shape>().
                     IsSameType(shapes[row - 1, column + 2].GetComponent<Shape>()))
@@ -144,6 +159,13 @@ public static class Utilities
                                     shapes[row - 1, column + 2]
                                 };
 
+                /* example *\
+                 * * * * *
+                 * * * * *
+                 * * * * *
+                 * & & * *
+                 * * * & *
+                \* example  */
 
                 if (row <= Constants.Rows - 2 && column <= Constants.Columns - 3)
                     if (shapes[row, column].GetComponent<Shape>().
@@ -153,12 +175,19 @@ public static class Utilities
                                     shapes[row, column],
                                     shapes[row, column + 1],
                                     shapes[row + 1, column + 2]
-                               };
+                                };
+
+                /* example *\
+                 * * * * *
+                 * * * * *
+                 * * * & *
+                 * & & * *
+                 * * * * *
+                \* example  */
             }
         }
         return null;
     }
-
 
     public static List<GameObject> CheckHorizontal3(int row, int column, ShapesArray shapes)
     {
@@ -176,8 +205,15 @@ public static class Utilities
                                     shapes[row, column + 3]
                                 };
             }
-        }
 
+            /* example *\
+              * * * * *  
+              * * * * *
+              * * * * *
+              * & & * &
+              * * * * *
+            \* example  */
+        }
         if (column >= 2 && column <= Constants.Columns - 2)
         {
             if (shapes[row, column].GetComponent<Shape>().
@@ -192,6 +228,14 @@ public static class Utilities
                                     shapes[row, column -2]
                                 };
             }
+
+            /* example *\
+              * * * * * 
+              * * * * *
+              * * * * *
+              * & * & &
+              * * * * *
+            \* example  */
         }
         return null;
     }
@@ -213,6 +257,14 @@ public static class Utilities
                                     shapes[row - 1, column -1]
                                 };
 
+                /* example *\
+                  * * * * *
+                  * * * * *
+                  * & * * *
+                  * & * * *
+                  & * * * *
+                \* example  */
+
                 if (column <= Constants.Columns - 2 && row >= 1)
                     if (shapes[row, column].GetComponent<Shape>().
                     IsSameType(shapes[row - 1, column + 1].GetComponent<Shape>()))
@@ -222,6 +274,14 @@ public static class Utilities
                                     shapes[row + 1, column],
                                     shapes[row - 1, column + 1]
                                 };
+
+                /* example *\
+                  * * * * *
+                  * * * * *
+                  * & * * *
+                  * & * * *
+                  * * & * *
+                \* example  */
             }
         }
         return null;
@@ -244,6 +304,14 @@ public static class Utilities
                                     shapes[row + 2, column -1]
                                 };
 
+                /* example *\
+                  * * * * *
+                  & * * * *
+                  * & * * *
+                  * & * * *
+                  * * * * *
+                \* example  */
+
                 if (column <= Constants.Columns - 2)
                     if (shapes[row, column].GetComponent<Shape>().
                     IsSameType(shapes[row + 2, column + 1].GetComponent<Shape>()))
@@ -253,6 +321,15 @@ public static class Utilities
                                     shapes[row+1, column],
                                     shapes[row + 2, column + 1]
                                 };
+
+                /* example *\
+                  * * * * *
+                  * * & * *
+                  * & * * *
+                  * & * * *
+                  * * * * *
+                \* example  */
+
             }
         }
         return null;
@@ -276,6 +353,14 @@ public static class Utilities
             }
         }
 
+        /* example *\
+          * & * * *
+          * * * * *
+          * & * * *
+          * & * * *
+          * * * * *
+        \* example  */
+
         if (row >= 2 && row <= Constants.Rows - 2)
         {
             if (shapes[row, column].GetComponent<Shape>().
@@ -291,6 +376,17 @@ public static class Utilities
                                 };
             }
         }
+
+        /* example *\
+          * * * * *
+          * & * * *
+          * & * * *
+          * * * * *
+          * & * * *
+        \* example  */
         return null;
     }
+
+
 }
+

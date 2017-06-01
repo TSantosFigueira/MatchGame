@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
-public class ShapeInfo : MonoBehaviour {
-
-	public int Column { get; set; }
+public class ShapeInfo
+{
+    public int Column { get; set; }
     public int Row { get; set; }
 }

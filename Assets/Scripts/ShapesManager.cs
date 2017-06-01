@@ -4,11 +4,13 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public class ShapesManager : MonoBehaviour {
 
+public class ShapesManager : MonoBehaviour
+{
     public Text DebugText, ScoreText;
     public bool ShowDebugInfo = false;
-  
+    //candy graphics taken from http://opengameart.org/content/candy-pack-1
+
     public ShapesArray shapes;
 
     private int score;
@@ -19,17 +21,18 @@ public class ShapesManager : MonoBehaviour {
     private GameState state = GameState.None;
     private GameObject hitGo = null;
     private Vector2[] SpawnPositions;
+    public GameObject OriginalCandyPrefab;
     public GameObject[] CandyPrefabs;
     public GameObject[] ExplosionPrefabs;
     public GameObject[] BonusPrefabs;
 
+    private Color[] colours = new Color[] { Color.blue, Color.red, Color.green, Color.cyan };
     private IEnumerator CheckPotentialMatchesCoroutine;
     private IEnumerator AnimatePotentialMatchesCoroutine;
 
     IEnumerable<GameObject> potentialMatches;
 
     public SoundManager soundManager;
-
     void Awake()
     {
         DebugText.enabled = ShowDebugInfo;
@@ -38,11 +41,29 @@ public class ShapesManager : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
+        CandyPrefabs = new GameObject[2];
+        InitializeCandyPrefabs();
+
         InitializeTypesOnPrefabShapesAndBonuses();
 
         InitializeCandyAndSpawnPositions();
 
         StartCheckForPotentialMatches();
+    }
+
+    private void InitializeCandyPrefabs()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            GameObject candy = Instantiate(OriginalCandyPrefab);
+            Renderer rend = candy.GetComponent<Renderer>();
+            rend.material.shader = Shader.Find("RandomShader");
+            Color candyColour = colours[Random.Range(0, colours.Length)];
+            rend.material.SetColor("_Color", candyColour);
+            candy.name = candyColour.ToString();
+
+            CandyPrefabs[i] = candy;
+        }    
     }
 
     /// <summary>
@@ -54,15 +75,15 @@ public class ShapesManager : MonoBehaviour {
         foreach (var item in CandyPrefabs)
         {
             item.GetComponent<Shape>().Type = item.name;
-
         }
 
-        //assign the name of the respective "normal" candy as the type of the Bonus
-        foreach (var item in BonusPrefabs)
-        {
-            item.GetComponent<Shape>().Type = CandyPrefabs.
-                Where(x => x.GetComponent<Shape>().Type.Contains(item.name.Split('_')[1].Trim())).Single().name;
-        }
+        //int i = 0;
+        ////assign the name of the respective "normal" candy as the type of the Bonus
+        //foreach (var item in BonusPrefabs)
+        //{
+        //    item.GetComponent<Shape>().Type = CandyPrefabs[i].name;
+        //    i++;
+        //}
     }
 
     public void InitializeCandyAndSpawnPositionsFromPremadeLevel()
@@ -81,19 +102,14 @@ public class ShapesManager : MonoBehaviour {
         {
             for (int column = 0; column < Constants.Columns; column++)
             {
-
                 GameObject newCandy = null;
-
                 newCandy = GetSpecificCandyOrBonusForPremadeLevel(premadeLevel[row, column]);
-
                 InstantiateAndPlaceNewCandy(row, column, newCandy);
-
             }
         }
 
         SetupSpawnPositions();
     }
-
 
     public void InitializeCandyAndSpawnPositions()
     {
@@ -109,7 +125,6 @@ public class ShapesManager : MonoBehaviour {
         {
             for (int column = 0; column < Constants.Columns; column++)
             {
-
                 GameObject newCandy = GetRandomCandy();
 
                 //check if two previous horizontal are of the same type
@@ -135,8 +150,6 @@ public class ShapesManager : MonoBehaviour {
 
         SetupSpawnPositions();
     }
-
-
 
     private void InstantiateAndPlaceNewCandy(int row, int column, GameObject newCandy)
     {
@@ -173,6 +186,7 @@ public class ShapesManager : MonoBehaviour {
         }
     }
 
+
     // Update is called once per frame
     void Update()
     {
@@ -191,7 +205,7 @@ public class ShapesManager : MonoBehaviour {
                     hitGo = hit.collider.gameObject;
                     state = GameState.SelectionStarted;
                 }
-
+                
             }
         }
         else if (state == GameState.SelectionStarted)
@@ -199,8 +213,6 @@ public class ShapesManager : MonoBehaviour {
             //user dragged
             if (Input.GetMouseButton(0))
             {
-
-
                 var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
                 //we have a hit
                 if (hit.collider != null && hitGo != hit.collider.gameObject)
@@ -301,8 +313,8 @@ public class ShapesManager : MonoBehaviour {
             }
 
             //check and instantiate Bonus if needed
-            if (addBonus)
-                CreateBonus(hitGoCache);
+            //if (addBonus)
+            //    CreateBonus(hitGoCache);
 
             addBonus = false;
 
@@ -320,12 +332,16 @@ public class ShapesManager : MonoBehaviour {
             MoveAndAnimate(newCandyInfo.AlteredCandy, maxDistance);
             MoveAndAnimate(collapsedCandyInfo.AlteredCandy, maxDistance);
 
+
+
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
             //search if there are matches with the new/collapsed items
             totalMatches = shapes.GetMatches(collapsedCandyInfo.AlteredCandy).
                 Union(shapes.GetMatches(newCandyInfo.AlteredCandy)).Distinct();
+
+
 
             timesRun++;
         }
@@ -338,19 +354,22 @@ public class ShapesManager : MonoBehaviour {
     /// Creates a new Bonus based on the shape parameter
     /// </summary>
     /// <param name="hitGoCache"></param>
-    private void CreateBonus(Shape hitGoCache)
-    {
-        GameObject Bonus = Instantiate(GetBonusFromType(hitGoCache.Type), BottomRight
-            + new Vector2(hitGoCache.Column * CandySize.x,
-                hitGoCache.Row * CandySize.y), Quaternion.identity)
-            as GameObject;
-        shapes[hitGoCache.Row, hitGoCache.Column] = Bonus;
-        var BonusShape = Bonus.GetComponent<Shape>();
-        //will have the same type as the "normal" candy
-        BonusShape.Assign(hitGoCache.Type, hitGoCache.Row, hitGoCache.Column);
-        //add the proper Bonus type
-        BonusShape.Bonus |= BonusType.DestroyWholeRowColumn;
-    }
+    //private void CreateBonus(Shape hitGoCache)
+    //{
+    //    GameObject Bonus = Instantiate(GetBonusFromType(hitGoCache.Type), BottomRight
+    //        + new Vector2(hitGoCache.Column * CandySize.x,
+    //            hitGoCache.Row * CandySize.y), Quaternion.identity)
+    //        as GameObject;
+    //    shapes[hitGoCache.Row, hitGoCache.Column] = Bonus;
+    //    var BonusShape = Bonus.GetComponent<Shape>();
+    //    //will have the same type as the "normal" candy
+    //    BonusShape.Assign(hitGoCache.Type, hitGoCache.Row, hitGoCache.Column);
+    //    //add the proper Bonus type
+    //    BonusShape.Bonus |= BonusType.DestroyWholeRowColumn;
+    //}
+
+
+
 
     /// <summary>
     /// Spawns new candy in columns that have missing ones
@@ -448,16 +467,16 @@ public class ShapesManager : MonoBehaviour {
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    private GameObject GetBonusFromType(string type)
-    {
-        string color = type.Split('_')[1].Trim();
-        foreach (var item in BonusPrefabs)
-        {
-            if (item.GetComponent<Shape>().Type.Contains(color))
-                return item;
-        }
-        throw new System.Exception("Wrong type");
-    }
+    //private GameObject GetBonusFromType(string type)
+    //{
+    //    string color = type.Split('_')[1].Trim();
+    //    foreach (var item in BonusPrefabs)
+    //    {
+    //        if (item.GetComponent<Shape>().Type.Contains(color))
+    //            return item;
+    //    }
+    //    throw new System.Exception("Wrong type");
+    //}
 
     /// <summary>
     /// Starts the coroutines, keeping a reference to stop later
@@ -547,4 +566,7 @@ public class ShapesManager : MonoBehaviour {
 
         throw new System.Exception("Wrong type, check your premade level");
     }
+
+
+
 }

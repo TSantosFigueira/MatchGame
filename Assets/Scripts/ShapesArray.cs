@@ -1,10 +1,14 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
-public class ShapesArray : MonoBehaviour {
+/// <summary>
+/// Custom class to accomodate useful stuff for our shapes array
+/// </summary>
+public class ShapesArray
+{
 
     private GameObject[,] shapes = new GameObject[Constants.Rows, Constants.Columns];
 
@@ -24,7 +28,7 @@ public class ShapesArray : MonoBehaviour {
             }
             catch (Exception ex)
             {
-
+                
                 throw ex;
             }
         }
@@ -79,7 +83,7 @@ public class ShapesArray : MonoBehaviour {
     private GameObject backupG2;
 
 
-
+   
 
     /// <summary>
     /// Returns the matches found for a list of GameObjects
@@ -139,6 +143,7 @@ public class ShapesArray : MonoBehaviour {
                     return true;
             }
         }
+
         return false;
     }
 
@@ -232,7 +237,7 @@ public class ShapesArray : MonoBehaviour {
         if (shape.Row != Constants.Rows - 1)
             for (int row = shape.Row + 1; row < Constants.Rows; row++)
             {
-                if (shapes[row, shape.Column] != null &&
+                if (shapes[row, shape.Column] != null && 
                     shapes[row, shape.Column].GetComponent<Shape>().IsSameType(shape))
                 {
                     matches.Add(shapes[row, shape.Column]);
@@ -286,7 +291,7 @@ public class ShapesArray : MonoBehaviour {
                             shapes[row2, column] = null;
 
                             //calculate the biggest distance
-                            if (row2 - row > collapseInfo.MaxDistance)
+                            if (row2 - row > collapseInfo.MaxDistance) 
                                 collapseInfo.MaxDistance = row2 - row;
 
                             //assign new row and column (name does not change)
@@ -320,3 +325,4 @@ public class ShapesArray : MonoBehaviour {
         return emptyItems;
     }
 }
+

@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
-public class MatchesInfo  {
+
+public class MatchesInfo
+{
     private List<GameObject> matchedCandies;
 
     /// <summary>
@@ -39,3 +42,4 @@ public class MatchesInfo  {
 
     public BonusType BonusesContained { get; set; }
 }
+

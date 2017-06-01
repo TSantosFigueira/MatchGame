@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
-public class AlteredCandyInfo {
 
+public class AlteredCandyInfo
+{
     private List<GameObject> newCandy { get; set; }
     public int MaxDistance { get; set; }
 

@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 
-/// <summary>
-/// This class will be used to hold details for each individual candy.
-/// Each candy GameObject on the screen will have a Shape component, the type of Shape, the Column and Row that the candy is placed.
-/// </summary>
-public class Shape : MonoBehaviour {
-
+public class Shape : MonoBehaviour
+{
     public BonusType Bonus { get; set; }
-    
     public int Column { get; set; }
     public int Row { get; set; }
+
     public string Type { get; set; }
 
     public Shape()
@@ -20,19 +17,28 @@ public class Shape : MonoBehaviour {
         Bonus = BonusType.None;
     }
 
-    //! Checks if the current shape is of the same time as the parameter
+    /// <summary>
+    /// Checks if the current shape is of the same type as the parameter
+    /// </summary>
+    /// <param name="otherShape"></param>
+    /// <returns></returns>
     public bool IsSameType(Shape otherShape)
     {
-        if(otherShape == null || !(otherShape is Shape))
+        if (otherShape == null || !(otherShape is Shape))
             throw new ArgumentException("otherShape");
 
         return string.Compare(this.Type, (otherShape as Shape).Type) == 0;
     }
 
-
-    //! Constructor alternative, since using regular constructor is not possible on prefab attached scripts
+    /// <summary>
+    /// Constructor alternative
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="row"></param>
+    /// <param name="column"></param>
     public void Assign(string type, int row, int column)
     {
+
         if (string.IsNullOrEmpty(type))
             throw new ArgumentException("type");
 
@@ -41,7 +47,12 @@ public class Shape : MonoBehaviour {
         Type = type;
     }
 
-    //! Swaps properties of the two shapes
+    /// <summary>
+    /// Swaps properties of the two shapes
+    /// We could do a shallow copy/exchange here, but anyway...
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
     public static void SwapColumnRow(Shape a, Shape b)
     {
         int temp = a.Row;
@@ -53,3 +64,6 @@ public class Shape : MonoBehaviour {
         b.Column = temp;
     }
 }
+
+
+
