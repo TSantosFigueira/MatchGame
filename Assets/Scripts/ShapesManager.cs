@@ -4,17 +4,13 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-
 public class ShapesManager : MonoBehaviour
 {
-    public Text DebugText, ScoreText;
-    public bool ShowDebugInfo = false;
-    //candy graphics taken from http://opengameart.org/content/candy-pack-1
-
+    public Text ScoreText;
     public ShapesArray shapes;
 
     private int score;
-
+    
     public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
     public readonly Vector2 CandySize = new Vector2(0.7f, 0.7f);
 
@@ -22,43 +18,35 @@ public class ShapesManager : MonoBehaviour
     private GameObject hitGo = null;
     private Vector2[] SpawnPositions;
     public GameObject OriginalCandyPrefab;
-    public GameObject[] CandyPrefabs;
+    private GameObject[] CandyPrefabs;
     public GameObject[] ExplosionPrefabs;
-    public GameObject[] BonusPrefabs;
+   // public GameObject[] BonusPrefabs;
 
-    private Color[] colours = new Color[] { Color.blue, Color.red, Color.green, Color.cyan };
     private IEnumerator CheckPotentialMatchesCoroutine;
     private IEnumerator AnimatePotentialMatchesCoroutine;
 
     IEnumerable<GameObject> potentialMatches;
 
     public SoundManager soundManager;
-    void Awake()
-    {
-        DebugText.enabled = ShowDebugInfo;
-    }
-
+ 
     // Use this for initialization
     void Start()
     {
-        CandyPrefabs = new GameObject[2];
+        CandyPrefabs = new GameObject[Constants.prefabCount];
         InitializeCandyPrefabs();
-
         InitializeTypesOnPrefabShapesAndBonuses();
-
         InitializeCandyAndSpawnPositions();
-
         StartCheckForPotentialMatches();
     }
 
     private void InitializeCandyPrefabs()
     {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < Constants.prefabCount; i++)
         {
             GameObject candy = Instantiate(OriginalCandyPrefab);
             Renderer rend = candy.GetComponent<Renderer>();
             rend.material.shader = Shader.Find("RandomShader");
-            Color candyColour = colours[Random.Range(0, colours.Length)];
+            Color candyColour = Constants.colours[i];
             rend.material.SetColor("_Color", candyColour);
             candy.name = candyColour.ToString();
 
@@ -190,9 +178,6 @@ public class ShapesManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (ShowDebugInfo)
-            DebugText.text = DebugUtilities.GetArrayContents(shapes);
-
         if (state == GameState.None)
         {
             //user has clicked or touched
@@ -555,14 +540,14 @@ public class ShapesManager : MonoBehaviour
             }
 
         }
-        else if (tokens.Count() == 2 && tokens[1].Trim() == "B")
-        {
-            foreach (var item in BonusPrefabs)
-            {
-                if (item.name.Contains(tokens[0].Trim()))
-                    return item;
-            }
-        }
+        //else if (tokens.Count() == 2 && tokens[1].Trim() == "B")
+        //{
+        //    foreach (var item in BonusPrefabs)
+        //    {
+        //        if (item.name.Contains(tokens[0].Trim()))
+        //            return item;
+        //    }
+        //}
 
         throw new System.Exception("Wrong type, check your premade level");
     }
