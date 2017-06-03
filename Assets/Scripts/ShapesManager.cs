@@ -47,7 +47,7 @@ public class ShapesManager : MonoBehaviour
             Renderer rend = candy.GetComponent<Renderer>();
             rend.material.shader = Shader.Find("RandomShader");
             Color candyColour = Constants.colours[i];
-            rend.material.SetColor("_Color", candyColour);
+            rend.material.SetColor("_Color", new Color(candyColour.r, Random.Range(candyColour.g, candyColour.g + 0.8f), candyColour.b, 1));
             candy.name = candyColour.ToString();
 
             CandyPrefabs[i] = candy;
